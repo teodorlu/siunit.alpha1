@@ -1,4 +1,4 @@
-(ns teodorlu.siunit.alpha1.metric-prefixes)
+(ns teodorlu.siunit.alpha1.metric-prefix)
 
 ;; for now, just a few ones
 
