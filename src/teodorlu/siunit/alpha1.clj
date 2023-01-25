@@ -40,11 +40,12 @@
             (:unit b)))))
 
 (defn * [& args]
-  (reduce (fn [a b]
-            (WithUnit. (clojure.core/* (:quantity a) (:quantity b))
-                       (merge-with clojure.core/+ (:unit a) (:unit b))))
-          one
-          (map coerce args)))
+  (canonicalize
+   (reduce (fn [a b]
+             (WithUnit. (clojure.core/* (:quantity a) (:quantity b))
+                        (merge-with clojure.core/+ (:unit a) (:unit b))))
+           one
+           (map coerce args))))
 
 (* 55 {:m 2})
 (map coerce [55 {:m 2}])
@@ -56,6 +57,14 @@
                        (:unit a)))
           x
           (map (comp canonicalize coerce) args)))
+
+(defn ^:private invert [x]
+  (WithUnit. (clojure.core// (:quantity x) )
+             (into {} (map (fn [[k v]] [k (clojure.core/- v)]) (:unit x)))))
+
+(defn /
+  ([x] (invert (coerce x)))
+  ([x & args] (apply * x (map (comp invert coerce) args))))
 
 (comment
   ;; 12 kNm
@@ -74,6 +83,16 @@
    (WithUnit. 12000 {:m 1})
    (WithUnit. 12000 {:m 1}))
   ;; => {:quantity 24000, :unit {:m 1}}
+
+  (* 12000 {:N 1 :m 1})
+  ;; => {:quantity 12000, :unit {:N 1, :m 1}}
+
+  (let [k 10e3
+        N (* :kg :m {:s -2})]
+    (/ (* 12000 {:kg 1 :m 1 :s -2})
+       k N))
+  ;; => {:quantity 1.2, :unit {}}
+
 
   )
 
