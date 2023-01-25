@@ -80,9 +80,7 @@
 (defn create-siunit [form]
   (cond (vector? form) (reduce * form)
         :else (coerce form))
-
-  ;; Should I crash here?
-
+  ;; I should perhaps crash here.
   )
 
 (comment
